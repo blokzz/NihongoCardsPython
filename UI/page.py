@@ -1,6 +1,8 @@
 import flet as ft
 
+from UI.components.flashcard import Flashcard
 from utils import check_level_up
+from UI.views.menu import MenuView
 
 class JapaneseApp:
     def __init__(self, page: ft.Page):
@@ -13,15 +15,11 @@ class JapaneseApp:
         self.page.title = "日本語暗記"
         self.page.theme_mode = ft.ThemeMode.DARK
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
-        
-        self.stats_text = ft.Text(f"Poziom: {self.level} | XP: {self.xp}", size=20)
-        self.btn = ft.ElevatedButton("Zaliczone słówko", on_click=self.add_xp)
-        
-        self.page.add(
-            ft.Text("こんにちは", size=40, weight="bold"),
-            self.stats_text,
-            self.btn
-        )
+        self.page.add(MenuView(self.page))
+        # self.page.add(
+        #     Flashcard(self.page, "私", "わたし").view
+        # )
+        self.page.update()
 
     @check_level_up
     def add_xp(self, e):
