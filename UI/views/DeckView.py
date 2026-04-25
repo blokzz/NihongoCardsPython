@@ -12,6 +12,13 @@ class DeckView(ft.Container):
         self._navigation = navigate
         self.expand = True
         self.decks = get_all_decks()
+        self.grid = ft.GridView(
+            controls=[DeckCard(deck, self._navigation) for deck in self.decks],
+            spacing=20,
+            max_extent=200,
+            run_spacing=20,
+            runs_count=3,
+        )
         self.content = ft.Column(
             scroll=ft.ScrollMode.AUTO,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -51,13 +58,7 @@ class DeckView(ft.Container):
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
               ft.Container(
-                    content=ft.GridView(
-                        controls=[DeckCard(deck) for deck in self.decks],
-                        spacing=20,
-                        max_extent=200,
-                        run_spacing=20,
-                        runs_count=3,
-                    ),
+                    content=self.grid,
                     alignment=ft.Alignment.CENTER,
                     expand=True,
                     padding=20,
@@ -93,5 +94,10 @@ class DeckView(ft.Container):
     def _save_deck(self, name: str, dialog: ft.AlertDialog):
         save_deck(Deck(id=len(self.decks)+1, name=name))
         self._close_dialog(dialog)
-        self._navigation(DeckView)
+        self._refresh()
         print(f"Dodano talię o nazwie: {name}")
+    def _refresh(self):
+        self.grid.controls = [DeckCard(deck) for deck in self._load_decks()]
+        self.grid.update()
+    def _load_decks(self) -> list[Deck]:
+        return get_all_decks()
