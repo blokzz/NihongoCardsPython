@@ -97,7 +97,7 @@ class DeckView(ft.Container):
         self._refresh()
         print(f"Dodano talię o nazwie: {name}")
     def _refresh(self):
-        self.grid.controls = [DeckCard(deck) for deck in self._load_decks()]
+        self.grid.controls = [DeckCard(deck, navigate=self._navigation) for deck in self._load_decks()]
         self.grid.update()
     def _load_decks(self) -> list[Deck]:
         return get_all_decks()
