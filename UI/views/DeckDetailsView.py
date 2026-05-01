@@ -3,7 +3,7 @@ from UI.theme import *
 from data.repository import *
 from UI.components.hoverButton import HoverButton
 from UI.components.BaseDialog import BaseDialog
-from UI.components.CustomField import CustomTextField
+from UI.components.CardDetails import CardDetails
 
 class DeckDetailsView(ft.Container):
     def __init__(self, navigate, * , deck_id):
@@ -19,7 +19,7 @@ class DeckDetailsView(ft.Container):
                 
                 content=ft.ListView(
                     controls=[
-                        ft.Text(f"{card.front} - {card.back}", size=20, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT, text_align=ft.TextAlign.CENTER) for card in self.cards
+                        CardDetails(card) for card in self.cards
                     ]
                 ),
                 alignment=ft.Alignment.CENTER,
@@ -99,3 +99,7 @@ class DeckDetailsView(ft.Container):
         delete_deck(self.deck_id)
         self._close_dialog(dialog)
         self._go_back(None)
+
+
+    def show_add_card_dialog(self, e):
+        pass
