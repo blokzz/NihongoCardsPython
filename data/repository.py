@@ -33,7 +33,7 @@ def get_cards(deck_id: int) -> list[Card]:
         rows = conn.execute(
             "SELECT * FROM cards WHERE deck_id = ?", (deck_id,)
         ).fetchall()
-        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3]) for r in rows]
+        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6]) for r in rows]
 
 def get_due_cards(deck_id: int) -> list[Card]:
     with get_connection() as conn:
@@ -41,13 +41,13 @@ def get_due_cards(deck_id: int) -> list[Card]:
             "SELECT * FROM cards WHERE deck_id = ? AND next_review <= date('now')",
             (deck_id,)
         ).fetchall()
-        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3]) for r in rows]
+        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6]) for r in rows]
 
 def save_card(card: Card) -> int:
     with get_connection() as conn:
         cursor = conn.execute(
-            "INSERT INTO cards (deck_id, front, back) VALUES (?, ?, ?)",
-            (card.deck_id, card.front, card.back)
+            "INSERT INTO cards (deck_id, front, back, card_type, example, reading) VALUES (?, ?, ?, ?, ?, ?)",
+            (card.deck_id, card.front, card.back, card.card_type, card.example, card.reading)
         )
         return cursor.lastrowid
 
@@ -77,3 +77,12 @@ def save_progress(xp: int, level: int) -> None:
             "INSERT OR REPLACE INTO user_progress (id, xp, level) VALUES (1, ?, ?)",
             (xp, level)
         )
+
+def get_next_card_id() -> int:
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT MAX(id) FROM cards"
+        ).fetchone()
+        if row[0] is None:
+            return 1
+        return row[0] + 1
