@@ -4,6 +4,7 @@ from data.repository import *
 from UI.components.hoverButton import HoverButton
 from UI.components.BaseDialog import BaseDialog
 from UI.components.CardDetails import CardDetails
+from UI.components.CustomField import CustomTextField
 
 class DeckDetailsView(ft.Container):
     def __init__(self, navigate, * , deck_id):
@@ -53,7 +54,7 @@ class DeckDetailsView(ft.Container):
                         ft.Container(
                             content=ft.Column(
                                 controls=[
-                                    # HoverButton(label="Add Card", on_click=self.show_add_deck_dialog),
+                                    HoverButton(label="Add Card", on_click=self.show_add_card_dialog),
                                     HoverButton(label="Delete Deck", on_click=self.show_delete_deck_dialog),
                                 ],
                                 spacing=10,
@@ -102,4 +103,45 @@ class DeckDetailsView(ft.Container):
 
 
     def show_add_card_dialog(self, e):
-        pass
+        front = CustomTextField(label="Front", autofocus=True)
+        back = CustomTextField(label="Back")
+        card_type = ft.Dropdown(
+            options=[
+                ft.dropdown.Option("Kanji"),
+                ft.dropdown.Option("Kana"),
+                ft.dropdown.Option("Word"),
+                ft.dropdown.Option("Sentence"),
+            ],
+            label="Card Type"
+        )
+        example = CustomTextField(label="Example")
+        reading = CustomTextField(label="Reading")
+        dialog = BaseDialog(
+            title="Add Card",
+            content=ft.Column([
+                front,
+                back,
+                example,
+                reading,
+                card_type,
+            ]),
+            actions=[
+                HoverButton("Add", on_click=lambda e: self._add_card(front.value, back.value, example.value, reading.value, card_type.value, dialog)),
+                HoverButton("Cancel", on_click=lambda e: self._close_dialog(dialog)),
+            ],
+        )
+        self._open_dialog(dialog)
+    def _add_card(self, front: str, back: str, example: str, reading: str, card_type: str, dialog: ft.AlertDialog):
+        save_card(Card(id=get_next_card_id(), deck_id=self.deck_id, front=front, back=back, example=example, reading=reading, card_type=card_type))
+        self._refresh()
+        self._close_dialog(dialog)
+
+    def _refresh(self):
+        self.cards = get_cards(self.deck_id)
+        if self.cards:
+            self.cardState.content.controls = [CardDetails(card) for card in self.cards]
+            self.cardState.content.update()
+        else:
+            self.cardState.content = ft.Text("Pusta talia", size=40, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT)
+            self.cardState.update()
+    
