@@ -19,9 +19,9 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS cards (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 deck_id     INTEGER NOT NULL REFERENCES decks(id),
-                card_type   TEXT NOT NULL,
                 front       TEXT NOT NULL,
                 back        TEXT NOT NULL,
+                card_type   TEXT NOT NULL,
                 example     TEXT,
                 reading     TEXT,
                 correct     INTEGER DEFAULT 0,
