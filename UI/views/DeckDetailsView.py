@@ -14,13 +14,23 @@ class DeckDetailsView(ft.Container):
         self.cards = get_cards(deck_id)
         self.cardState = None
         if self.cards == []:
-            self.cardState = ft.Text("Pusta talia", size=40, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT)
+            self.cardState = ft.Container(
+                content=ft.Text("Pusta talia", size=40, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT),
+                alignment=ft.Alignment.CENTER,
+                expand=True,
+                padding=20,
+                width=700,
+            )
         else:
             self.cardState = ft.Container(
                 
                 content=ft.ListView(
                     controls=[
-                        CardDetails(card) for card in self.cards
+                        CardDetails(
+                            card,
+                            on_edit=lambda e, c=card: self.show_edit_card_dialog(c),
+                            on_delete=lambda e, c=card: self.show_delete_card_dialog(c)
+                        ) for card in self.cards
                     ]
                 ),
                 alignment=ft.Alignment.CENTER,
@@ -124,11 +134,12 @@ class DeckDetailsView(ft.Container):
                 example,
                 reading,
                 card_type,
-            ]),
+            ], tight=True),
             actions=[
                 HoverButton("Add", on_click=lambda e: self._add_card(front.value, back.value, example.value, reading.value, card_type.value, dialog)),
                 HoverButton("Cancel", on_click=lambda e: self._close_dialog(dialog)),
             ],
+            
         )
         self._open_dialog(dialog)
     def _add_card(self, front: str, back: str, example: str, reading: str, card_type: str, dialog: ft.AlertDialog):
@@ -136,11 +147,72 @@ class DeckDetailsView(ft.Container):
         self._refresh()
         self._close_dialog(dialog)
 
+    def show_edit_card_dialog(self, card: Card):
+        front = CustomTextField(label="Front", value=card.front, autofocus=True)
+        back = CustomTextField(label="Back", value=card.back)
+        card_type = ft.Dropdown(
+            options=[
+                ft.dropdown.Option("Kanji"),
+                ft.dropdown.Option("Kana"),
+                ft.dropdown.Option("Word"),
+                ft.dropdown.Option("Sentence"),
+            ],
+            label="Card Type",
+            value=card.card_type
+        )
+        example = CustomTextField(label="Example", value=card.example)
+        reading = CustomTextField(label="Reading", value=card.reading)
+        dialog = BaseDialog(
+            title="Edit Card",
+            content=ft.Column([
+                front,
+                back,
+                example,
+                reading,
+                card_type,
+            ], tight=True),
+            actions=[
+                HoverButton("Save", on_click=lambda e: self._edit_card(card.id, front.value, back.value, example.value, reading.value, card_type.value, dialog)),
+                HoverButton("Cancel", on_click=lambda e: self._close_dialog(dialog)),
+            ],
+        )
+        self._open_dialog(dialog)
+
+    def _edit_card(self, card_id: int, front: str, back: str, example: str, reading: str, card_type: str, dialog: ft.AlertDialog):
+        update_card_details(card_id, front, back, card_type, example, reading)
+        self._refresh()
+        self._close_dialog(dialog)
+
+    def show_delete_card_dialog(self, card: Card):
+        field = ft.Text("Are you sure you want to delete this card?", size=20, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT, text_align=ft.TextAlign.CENTER)
+        dialog = BaseDialog(
+            title="Delete Card",
+            content=field,
+            actions=[
+                HoverButton("Delete", on_click=lambda e: self._delete_card(card.id, dialog)),
+                HoverButton("Cancel", on_click=lambda e: self._close_dialog(dialog)),
+            ],
+        )
+        self._open_dialog(dialog)
+
+    def _delete_card(self, card_id: int, dialog: ft.AlertDialog):
+        delete_card(card_id)
+        self._refresh()
+        self._close_dialog(dialog)
+
     def _refresh(self):
         self.cards = get_cards(self.deck_id)
         if self.cards:
-            self.cardState.content.controls = [CardDetails(card) for card in self.cards]
-            self.cardState.content.update()
+            self.cardState.content = ft.ListView(
+                controls=[
+                    CardDetails(
+                        card, 
+                        on_edit=lambda e, c=card: self.show_edit_card_dialog(c),
+                        on_delete=lambda e, c=card: self.show_delete_card_dialog(c)
+                    ) for card in self.cards
+                ]
+            )
+            self.cardState.update()
         else:
             self.cardState.content = ft.Text("Pusta talia", size=40, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT)
             self.cardState.update()
