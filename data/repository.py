@@ -60,6 +60,15 @@ def update_card(card: Card) -> None:
             (card.correct, card.incorrect, card.next_review, card.interval, card.id)
         )
 
+def update_card_details(card_id: int, front: str, back: str, card_type: str, example: str, reading: str) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            """UPDATE cards 
+               SET front = ?, back = ?, card_type = ?, example = ?, reading = ?
+               WHERE id = ?""",
+            (front, back, card_type, example, reading, card_id)
+        )
+
 def delete_card(card_id: int) -> None:
     with get_connection() as conn:
         conn.execute("DELETE FROM cards WHERE id = ?", (card_id,))
