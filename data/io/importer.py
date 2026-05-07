@@ -1,0 +1,38 @@
+import json
+import re
+from data.models import Card , Deck
+from data.repository import save_card , save_deck , get_next_card_id
+from core.exceptions import *
+
+def import_from_json(path: str) -> Deck:
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+        _validate_json(data)
+        deck_id = save_deck(Deck(id = None , name=data['name']))
+        for card_data in data['cards']:
+            card = Card(
+                id = get_next_card_id(),
+                deck_id=deck_id,
+                front=card_data['front'],
+                back=card_data['back'],
+                card_type=card_data.get('card_type' , 'Word'),
+                example=card_data.get('example' , ""),
+                reading=card_data.get('reading' , "")
+            )
+            save_card(card)
+        return deck_id
+
+
+
+def _validate_json(data: dict) -> None:
+    japanese = re.compile(r'[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]')
+    if "name" not in data:
+        raise InvalidCardError("Brak pola 'name' w pliku JSON")
+    if "cards" not in data:
+        raise InvalidCardError("Brak pola 'cards' w pliku JSON")
+    
+    for card in data["cards"]:
+        if "front" not in card or "back" not in card:
+            raise InvalidCardError(f"Karta musi mieć pola 'front' i 'back'")
+        if not japanese.search(card["front"]):
+            raise InvalidCardError(f"Front '{card['front']}' nie zawiera japońskich znaków")
