@@ -10,7 +10,7 @@ class MenuView(ft.Column):
         self.content = { "Start" : FlashcardView,
                             "Decks" : DeckView,
                             "Settings" : FlashcardView,
-                            "Exit" : lambda e: self.page.window.close()
+                            "Exit" : None
         }
         self.expand = True
         self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
@@ -36,8 +36,8 @@ class MenuView(ft.Column):
             ft.Text("v0.1", size=12, color=SURFACE),
         ]
 
-    def _on_fiszki_click(self, e):
+    async def _on_fiszki_click(self, e):
         if e.control.data == "Exit":
-            self.page.window.close()
+            await self.page.window.close()
         else:
             self._navigation(self.content[e.control.data])
