@@ -6,11 +6,13 @@ from UI.components.hoverButton import HoverButton
 from UI.components.CustomField import CustomTextField
 from UI.components.BaseDialog import BaseDialog
 from data.repository import *
+from data.io.importer import *
 class DeckView(ft.Container):
     def __init__(self, navigate):
         super().__init__()
         self._navigation = navigate
         self.expand = True
+        self.file_picker = ft.FilePicker()
         self.decks = get_all_decks()
         self.grid = ft.GridView(
             controls=[DeckCard(deck, self._navigation) for deck in self.decks],
@@ -45,7 +47,7 @@ class DeckView(ft.Container):
                             content=ft.Column(
                                 controls=[
                                     HoverButton(label="Add Deck", on_click=self.show_add_deck_dialog),
-                                    HoverButton(label="Import Deck", on_click=self._go_back),
+                                    HoverButton(label="Import Deck", on_click=self.import_deck),
                                 ],
                                 spacing=10,
                                 horizontal_alignment=ft.CrossAxisAlignment.END,
@@ -101,3 +103,18 @@ class DeckView(ft.Container):
         self.grid.update()
     def _load_decks(self) -> list[Deck]:
         return get_all_decks()
+
+    async def import_deck(self, e):
+        files = await self.file_picker.pick_files(
+            allow_multiple=False,
+            allowed_extensions=["json"],
+            file_type=ft.FilePickerFileType.CUSTOM,
+        )
+        if files:
+            path = files[0].path
+            try:
+                from data.io.importer import import_from_json
+                import_from_json(path)
+                self._refresh()
+            except Exception as ex:
+                print(f"Błąd importu: {ex}")
