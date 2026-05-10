@@ -1,3 +1,4 @@
+from utils import handle_errors
 import flet as ft
 from UI.theme import *
 from data.repository import *
@@ -5,11 +6,10 @@ from UI.components.hoverButton import HoverButton
 from UI.components.BaseDialog import BaseDialog
 from UI.components.CardDetails import CardDetails
 from UI.components.CustomField import CustomTextField
-
-class DeckDetailsView(ft.Container):
+from UI.views.BaseView import BaseView
+class DeckDetailsView(BaseView):
     def __init__(self, navigate, * , deck_id):
-        super().__init__()
-        self._navigate = navigate
+        super().__init__(navigate)
         self.deck_id = deck_id
         self.cards = get_cards(deck_id)
         self.cardState = None
@@ -83,7 +83,7 @@ class DeckDetailsView(ft.Container):
 
     def _go_back(self, e):
         from UI.views.DeckView import DeckView
-        self._navigate(DeckView)
+        self._navigation(DeckView)
 
     def _open_dialog(self, dialog: ft.AlertDialog):
         self.page.overlay.append(dialog)
@@ -142,6 +142,8 @@ class DeckDetailsView(ft.Container):
             
         )
         self._open_dialog(dialog)
+
+    @handle_errors("Card added successfully")
     def _add_card(self, front: str, back: str, example: str, reading: str, card_type: str, dialog: ft.AlertDialog):
         save_card(Card(id=get_next_card_id(), deck_id=self.deck_id, front=front, back=back, example=example, reading=reading, card_type=card_type))
         self._refresh()
@@ -194,7 +196,8 @@ class DeckDetailsView(ft.Container):
             ],
         )
         self._open_dialog(dialog)
-
+    
+    @handle_errors("Card deleted successfully")
     def _delete_card(self, card_id: int, dialog: ft.AlertDialog):
         delete_card(card_id)
         self._refresh()
