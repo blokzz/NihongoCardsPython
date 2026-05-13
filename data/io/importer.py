@@ -26,13 +26,14 @@ def import_from_json(path: str) -> Deck:
 
 def _validate_json(data: dict) -> None:
     japanese = re.compile(r'[\u3040-\u309f\u30a0-\u30ff\u4e00-\u9fff]')
+    
     if "name" not in data:
-        raise InvalidCardError("Brak pola 'name' w pliku JSON")
+        raise InvalidJsonError("name")
     if "cards" not in data:
-        raise InvalidCardError("Brak pola 'cards' w pliku JSON")
+        raise InvalidJsonError("cards")
     
     for card in data["cards"]:
         if "front" not in card or "back" not in card:
-            raise InvalidCardError(f"Karta musi mieć pola 'front' i 'back'")
+            raise InvalidJsonError("front/back")
         if not japanese.search(card["front"]):
-            raise InvalidCardError(f"Front '{card['front']}' nie zawiera japońskich znaków")
+            raise InvalidCardError("front", card["front"])
