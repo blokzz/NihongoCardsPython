@@ -26,6 +26,12 @@ def log_errors(func):
     return wrapper
 
 def handle_errors(success_msg: str = None):
+    def _handle(self, ex: Exception):
+        if isinstance(ex, (InvalidCardError, EmptyDeckError, InvalidJsonError, InvalidFormatError)):
+            self.show_error(str(ex))
+        else:
+            self.show_error(f"Error: {str(ex)}")
+
     def decorator(func):
         if asyncio.iscoroutinefunction(func):
             async def wrapper(self, *args, **kwargs):
@@ -34,12 +40,8 @@ def handle_errors(success_msg: str = None):
                     if success_msg:
                         self.show_success(success_msg)
                     return result
-                except InvalidCardError as ex:
-                    self.show_error(str(ex))
-                except EmptyDeckError as ex:
-                    self.show_error(str(ex))
                 except Exception as ex:
-                    self.show_error(str(ex))
+                    _handle(self, ex)
             return wrapper
         else:
             def wrapper(self, *args, **kwargs):
@@ -48,11 +50,7 @@ def handle_errors(success_msg: str = None):
                     if success_msg:
                         self.show_success(success_msg)
                     return result
-                except InvalidCardError as ex:
-                    self.show_error(str(ex))
-                except EmptyDeckError as ex:
-                    self.show_error(str(ex))
                 except Exception as ex:
-                    self.show_error(str(ex))
+                    _handle(self, ex)
             return wrapper
     return decorator
