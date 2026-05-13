@@ -1,3 +1,4 @@
+from utils import handle_errors
 import flet as ft
 from UI.components.DeckCard import DeckCard
 from UI.theme import *
@@ -7,10 +8,10 @@ from UI.components.CustomField import CustomTextField
 from UI.components.BaseDialog import BaseDialog
 from data.repository import *
 from data.io.importer import *
-class DeckView(ft.Container):
+from UI.views.BaseView import BaseView
+class DeckView(BaseView):
     def __init__(self, navigate):
-        super().__init__()
-        self._navigation = navigate
+        super().__init__(navigate)
         self.expand = True
         self.file_picker = ft.FilePicker()
         self.decks = get_all_decks()
@@ -83,7 +84,6 @@ class DeckView(ft.Container):
         print("Zamknięto dialog")
     def show_add_deck_dialog(self, e):
         field = CustomTextField(label="Nazwa talii", autofocus=True)
-
         dialog = BaseDialog(
             title="Nowa talia",
             content=field,
@@ -93,28 +93,34 @@ class DeckView(ft.Container):
             ],
         )
         self._open_dialog(dialog)
+
+    @handle_errors("Deck added successfully")
     def _save_deck(self, name: str, dialog: ft.AlertDialog):
+        if not name:
+            raise InvalidFormatError("Name cannot be empty")
         save_deck(Deck(id=len(self.decks)+1, name=name))
         self._close_dialog(dialog)
         self._refresh()
         print(f"Dodano talię o nazwie: {name}")
+
     def _refresh(self):
         self.grid.controls = [DeckCard(deck, navigate=self._navigation) for deck in self._load_decks()]
         self.grid.update()
+
     def _load_decks(self) -> list[Deck]:
         return get_all_decks()
 
+    @handle_errors("Deck imported successfully")
     async def import_deck(self, e):
         files = await self.file_picker.pick_files(
             allow_multiple=False,
             allowed_extensions=["json"],
             file_type=ft.FilePickerFileType.CUSTOM,
         )
-        if files:
+        if not files:
+            raise InvalidJsonError("No file selected")
+        else:
             path = files[0].path
-            try:
-                from data.io.importer import import_from_json
-                import_from_json(path)
-                self._refresh()
-            except Exception as ex:
-                print(f"Błąd importu: {ex}")
+            from data.io.importer import import_from_json
+            import_from_json(path)
+            self._refresh()

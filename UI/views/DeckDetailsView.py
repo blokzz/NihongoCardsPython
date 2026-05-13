@@ -54,7 +54,7 @@ class DeckDetailsView(BaseView):
                             width=200,
                         ),
                         ft.Text(
-                            f"Szczegóły talii o ID: {deck_id}",
+                            f"Deck: {get_deck(self.deck_id).name} Details",
                             size=40,
                             weight=ft.FontWeight.BOLD,
                             color=PRIMARY_TEXT,
@@ -105,7 +105,7 @@ class DeckDetailsView(BaseView):
             ],
         )
         self._open_dialog(dialog)
-        
+    @handle_errors("Deck deleted successfully")
     def _delete_deck(self, dialog: ft.AlertDialog):
         delete_deck(self.deck_id)
         self._close_dialog(dialog)
