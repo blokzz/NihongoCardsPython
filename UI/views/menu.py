@@ -1,6 +1,7 @@
 from UI.views.BaseView import BaseView
-from UI.views.FlashCardView import FlashcardView
+from UI.views.StudyView import StudyView
 from UI.views.DeckView import DeckView
+from UI.views.SelectDeckView import SelectDeckView
 import flet as ft
 from UI.components.hoverButton import HoverButton
 from UI.theme import *
@@ -10,9 +11,9 @@ class MenuView(BaseView):
         super().__init__(navigate)
         self.expand = True
         self.views_map = { 
-            "Start": FlashcardView,
+            "Start": SelectDeckView,
             "Decks": DeckView,
-            "Settings": FlashcardView,
+            "Settings": StudyView,
             "Exit": None
         }
         self.info_text = ft.Text("", size=16, color=PRIMARY_TEXT)
@@ -66,5 +67,7 @@ class MenuView(BaseView):
     async def _on_fiszki_click(self, e):
         if e.control.data == "Exit":
             await self.page.window.close()
+        elif e.control.data == "Settings":
+            self.show_success("Ustawienia są w budowie!")
         else:
             self._navigation(self.views_map[e.control.data])
