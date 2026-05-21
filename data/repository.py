@@ -31,17 +31,17 @@ def delete_deck(deck_id: int) -> None:
 def get_cards(deck_id: int) -> list[Card]:
     with get_connection() as conn:
         rows = conn.execute(
-            "SELECT * FROM cards WHERE deck_id = ?", (deck_id,)
+            "SELECT id, deck_id, front, back, card_type, example, reading, correct, incorrect, interval, next_review FROM cards WHERE deck_id = ?", (deck_id,)
         ).fetchall()
-        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6]) for r in rows]
+        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6], correct=r[7], incorrect=r[8], interval=r[9], next_review=r[10]) for r in rows]
 
 def get_due_cards(deck_id: int) -> list[Card]:
     with get_connection() as conn:
         rows = conn.execute(
-            "SELECT * FROM cards WHERE deck_id = ? AND next_review <= date('now')",
+            "SELECT id, deck_id, front, back, card_type, example, reading, correct, incorrect, interval, next_review FROM cards WHERE deck_id = ? AND next_review <= date('now')",
             (deck_id,)
         ).fetchall()
-        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6]) for r in rows]
+        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6], correct=r[7], incorrect=r[8], interval=r[9], next_review=r[10]) for r in rows]
 
 def save_card(card: Card) -> int:
     with get_connection() as conn:
