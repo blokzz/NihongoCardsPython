@@ -1,6 +1,8 @@
 from datetime import date
 class Card:
-    def __init__(self, id: int, front: str, back: str, card_type: str, deck_id: int, next_review: date = None , example: str = None, reading: str = None):
+    def __init__(self, id: int, front: str, back: str, card_type: str, deck_id: int, 
+                 next_review: str = None, example: str = None, reading: str = None, 
+                 correct: int = 0, incorrect: int = 0, interval: int = 1):
         self.id = id
         self.front = front
         self.back = back
@@ -9,6 +11,9 @@ class Card:
         self.next_review = next_review
         self.example = example
         self.reading = reading
+        self.correct = correct
+        self.incorrect = incorrect
+        self.interval = interval
 
 class Deck:
     def __init__(self, id: int, name: str):
