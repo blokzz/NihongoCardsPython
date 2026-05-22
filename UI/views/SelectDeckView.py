@@ -65,7 +65,7 @@ class SelectDeckView(BaseView):
                             width=200,
                         ),
                         ft.Text(
-                            "Wybierz talię",
+                            "Choose deck",
                             size=40,
                             weight=ft.FontWeight.BOLD,
                             color=PRIMARY_TEXT,
@@ -77,7 +77,7 @@ class SelectDeckView(BaseView):
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 ),
                 ft.Container(
-                    content=self.grid if self.decks else ft.Text("Brak talii, dodaj jakąś najpierw!", size=24, color=ft.Colors.GREY_500),
+                    content=self.grid if self.decks else ft.Text("No decks yet, add one first!", size=24, color=ft.Colors.GREY_500),
                     alignment=ft.Alignment.CENTER,
                     expand=True,
                     padding=20,
