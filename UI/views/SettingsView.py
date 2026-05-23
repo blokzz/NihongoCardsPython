@@ -6,7 +6,13 @@ from UI.theme import *
 class SettingsView(BaseView):
     def __init__(self, navigate):
         super().__init__(navigate)
+        print(f"SettingsView __init__ - PRIMARY: {PRIMARY}")
         self.expand = True
+        
+        settings = self._load_settings_file()
+        self.current_goal = str(settings.get("daily_goal", "10"))
+        self.current_order = settings.get("study_order", "Random")
+        self.current_theme = settings.get("theme_color", "czerwony")
         
         self.dropdown_goal = ft.Dropdown(
             width=120,
@@ -25,8 +31,9 @@ class SettingsView(BaseView):
             focused_border_color=PRIMARY,
             bgcolor=BG_BUTTON,
             color=PRIMARY_TEXT,
+            value=self.current_goal,
         )
-        self.dropdown_goal.on_change = self._save_settings
+        self.dropdown_goal.on_change = self._on_dropdown_change
 
         self.dropdown_order = ft.Dropdown(
             width=150,
@@ -41,36 +48,39 @@ class SettingsView(BaseView):
             focused_border_color=PRIMARY,
             bgcolor=BG_BUTTON,
             color=PRIMARY_TEXT,
+            value=self.current_order,
         )
-        self.dropdown_order.on_change = self._save_settings
+        self.dropdown_order.on_change = self._on_dropdown_change
 
-        self.dropdown_theme = ft.Dropdown(
-            width=150,
-            height=40,
-            options=[
-                ft.dropdown.Option("czerwony", "Czerwony"),
-                ft.dropdown.Option("zielony", "Zielony"),
-                ft.dropdown.Option("różowy", "Różowy"),
-                ft.dropdown.Option("niebieski", "Niebieski"),
-            ],
-            text_size=14,
-            border_radius=8,
-            border_color=ft.Colors.GREY_700,
-            focused_border_color=PRIMARY,
-            bgcolor=BG_BUTTON,
-            color=PRIMARY_TEXT,
-        )
-        self.dropdown_theme.on_change = self._save_settings
+        theme_options = []
+        for name, color in THEMES.items():
+            is_active = (self.current_theme == name)
+            theme_options.append(
+                ft.Container(
+                    width=32,
+                    height=32,
+                    border_radius=16,
+                    bgcolor=color,
+                    content=ft.Icon(ft.Icons.CHECK, color=ft.Colors.WHITE, size=16) if is_active else None,
+                    alignment=ft.Alignment.CENTER,
+                    on_click=lambda e, name=name: self._change_theme(name),
+                    border=ft.border.all(2, ft.Colors.WHITE) if is_active else None,
+                    animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT)
+                )
+            )
+        self.theme_row = ft.Row(controls=theme_options, spacing=10)
 
         self.switch_reading = ft.Switch(
+            value=settings.get("show_reading", True),
             active_color=PRIMARY,
         )
-        self.switch_reading.on_change = self._save_settings
+        self.switch_reading.on_change = self._save_settings_switches
 
         self.switch_sound = ft.Switch(
+            value=settings.get("sound_effects", True),
             active_color=PRIMARY,
         )
-        self.switch_sound.on_change = self._save_settings
+        self.switch_sound.on_change = self._save_settings_switches
         
         self.btn_reset = ft.TextButton(
             content=ft.Row(
@@ -155,7 +165,7 @@ class SettingsView(BaseView):
                                         ft.Icons.PALETTE_ROUNDED,
                                         "Kolor przewodzący",
                                         "Wybierz główny kolor akcentowy aplikacji.",
-                                        self.dropdown_theme
+                                        self.theme_row
                                     ),
                                     self.create_setting_row(
                                         ft.Icons.VOLUME_UP_ROUNDED,
@@ -226,31 +236,37 @@ class SettingsView(BaseView):
             print(f"Error saving settings file: {e}")
 
     def did_mount(self):
-        settings = self._load_settings_file()
-        
-        self.dropdown_goal.value = str(settings.get("daily_goal", "10"))
-        self.dropdown_order.value = settings.get("study_order", "Random")
-        self.switch_reading.value = settings.get("show_reading", True)
-        self.switch_sound.value = settings.get("sound_effects", True)
-        self.dropdown_theme.value = settings.get("theme_color", "czerwony")
-        self.page.update()
+        pass
 
-    def _save_settings(self, e):
+    def _save_settings(self):
         settings = {
-            "daily_goal": self.dropdown_goal.value,
-            "study_order": self.dropdown_order.value,
+            "daily_goal": self.current_goal,
+            "study_order": self.current_order,
             "show_reading": self.switch_reading.value,
             "sound_effects": self.switch_sound.value,
-            "theme_color": self.dropdown_theme.value
+            "theme_color": self.current_theme
         }
         self._save_settings_file(settings)
+
+    def _save_settings_switches(self, e):
+        self._save_settings()
+        self.show_success("Ustawienia zostały zapisane!")
+
+    def _change_theme(self, theme_name):
+        self.current_theme = theme_name
+        self._save_settings()
         
         from UI.theme import set_primary_theme
-        set_primary_theme(self.dropdown_theme.value)
+        set_primary_theme(theme_name)
         
-        self.show_success("Ustawienia zostały zapisane!")
-        
+        self.show_success("Kolor przewodzący został zmieniony!")
         self._navigation(SettingsView)
+
+    def _on_dropdown_change(self, e):
+        self.current_goal = self.dropdown_goal.value
+        self.current_order = self.dropdown_order.value
+        self._save_settings()
+        self.show_success("Ustawienia zostały zapisane!")
 
     def create_setting_card(self, title: str, controls_list: list):
         return ft.Container(

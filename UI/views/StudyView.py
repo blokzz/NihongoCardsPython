@@ -8,51 +8,82 @@ class StudyView(BaseView):
         super().__init__(navigate)
         self.session = StudySession(deck_id)
         
-        self.front_text = ft.Text("", size=50, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT)
-        self.reading_text = ft.Text("", size=22, color=ft.Colors.RED_300, italic=True, visible=False)
-        self.back_text = ft.Text("", size=30, color=PRIMARY_TEXT, visible=False)
-        self.example_text = ft.Text("", size=18, color=ft.Colors.GREY_300, italic=True, visible=False, text_align=ft.TextAlign.CENTER)
-        self.progress_text = ft.Text("", size=16, color=ft.Colors.GREY_400)
+        # Status Badge inside the card
+        self.status_pill = ft.Text("QUESTION", size=10, weight=ft.FontWeight.BOLD, color=PRIMARY)
+        self.status_badge = ft.Container(
+            content=self.status_pill,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.3, PRIMARY)),
+            border_radius=12,
+            padding=ft.padding.symmetric(horizontal=12, vertical=4),
+        )
+        
+        # Flashcard text elements
+        self.front_text = ft.Text("", size=44, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT, text_align=ft.TextAlign.CENTER)
+        self.reading_text = ft.Text("", size=18, color=PRIMARY, italic=True, visible=False, text_align=ft.TextAlign.CENTER)
+        self.divider_line = ft.Divider(height=1, color=ft.Colors.with_opacity(0.1, PRIMARY_TEXT), visible=False)
+        self.back_text = ft.Text("", size=24, color=PRIMARY_TEXT, weight=ft.FontWeight.W_500, visible=False, text_align=ft.TextAlign.CENTER)
+        self.example_text = ft.Text("", size=15, color=ft.Colors.GREY_400, italic=True, visible=False, text_align=ft.TextAlign.CENTER)
+        
+        # Guide/Hint text and progress metrics
+        self.action_hint_text = ft.Text("Tap card to reveal answer", size=11, color=ft.Colors.GREY_500)
+        self.progress_text = ft.Text("", size=14, weight=ft.FontWeight.W_500, color=ft.Colors.GREY_400)
+        self.progress_bar = ft.ProgressBar(value=0.0, color=PRIMARY, bgcolor=ft.Colors.GREY_800, height=4, border_radius=2)
 
+        # Tactical physical card container
         self.card_container = ft.Container(
             content=ft.Column(
                 controls=[
-                    self.front_text,
-                    self.reading_text,
-                    ft.Container(height=10),
-                    self.back_text,
-                    ft.Container(height=10),
-                    self.example_text,
+                    # Status header row
+                    ft.Row(
+                        controls=[
+                            self.status_badge,
+                            ft.Icon(ft.Icons.LIGHTBULB_OUTLINE_ROUNDED, color=ft.Colors.GREY_600, size=20),
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    ),
+                    ft.Container(expand=True),
+                    
+                    # Content area
+                    ft.Column(
+                        controls=[
+                            self.front_text,
+                            self.reading_text,
+                            self.divider_line,
+                            self.back_text,
+                            self.example_text,
+                        ],
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=12,
+                    ),
+                    
+                    ft.Container(expand=True),
+                    # Action hint
+                    self.action_hint_text,
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                alignment=ft.MainAxisAlignment.CENTER,
             ),
-            bgcolor=BG_BUTTON,
-            border_radius=15,
-            padding=40,
-            width=500,
+            bgcolor=ft.Colors.GREY_900,
+            border_radius=20,
+            border=ft.border.all(1, ft.Colors.with_opacity(0.15, PRIMARY_TEXT)),
+            padding=30,
+            width=480,
+            height=320,  # Strict stable layout proportions
             alignment=ft.Alignment.CENTER,
             on_click=self._reveal,
         )
 
-        self.buttons_container = ft.Column(
+        # Custom horizontal color-coded difficulty selector buttons
+        self.btn_again = self._create_rating_button("Again", 0, ft.Colors.RED_400)
+        self.btn_hard = self._create_rating_button("Hard", 3, ft.Colors.ORANGE_400)
+        self.btn_good = self._create_rating_button("Good", 2, PRIMARY)
+        self.btn_easy = self._create_rating_button("Easy", 1, ft.Colors.GREEN_400)
+
+        self.buttons_container = ft.Row(
             controls=[
-                ft.Row(
-                    controls=[
-                        HoverButton("Nothing", on_click=lambda e: self._answer(0)),
-                        HoverButton("Easy", on_click=lambda e: self._answer(1)),
-                    ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    spacing=20,
-                ),
-                ft.Row(
-                    controls=[
-                        HoverButton("Good", on_click=lambda e: self._answer(2)),
-                        HoverButton("Hard", on_click=lambda e: self._answer(3)),
-                    ],
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    spacing=20,
-                ),
+                self.btn_again,
+                self.btn_hard,
+                self.btn_good,
+                self.btn_easy,
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=15,
@@ -79,13 +110,18 @@ class StudyView(BaseView):
                         ft.Container(expand=True),
                     ],
                 ),
+                ft.Container(
+                    content=self.progress_bar,
+                    padding=ft.padding.symmetric(horizontal=40),
+                    width=480,
+                ),
                 ft.Column(
                     expand=True,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     alignment=ft.MainAxisAlignment.CENTER,
                     spacing=20,
                     controls=[
-                        # self.progress_text,
+                        self.progress_text,
                         self.card_container,
                         self.buttons_container,
                     ]
@@ -93,6 +129,34 @@ class StudyView(BaseView):
             ],
         )
         self._load_next()
+
+    def _create_rating_button(self, label: str, rating_val: int, active_color: str):
+        btn_text = ft.Text(label, size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_300)
+        
+        def on_hover_btn(e):
+            is_hovered = str(e.data).lower() == "true"
+            container.bgcolor = active_color if is_hovered else ft.Colors.TRANSPARENT
+            btn_text.color = ft.Colors.BLACK if is_hovered else ft.Colors.GREY_300
+            container.shadow = ft.BoxShadow(
+                spread_radius=1,
+                blur_radius=10,
+                color=ft.Colors.with_opacity(0.4, active_color if is_hovered else ft.Colors.BLACK),
+                offset=ft.Offset(0, 3)
+            ) if is_hovered else None
+            container.update()
+            
+        container = ft.Container(
+            content=btn_text,
+            width=100,
+            height=42,
+            border_radius=10,
+            border=ft.border.all(1.5, ft.Colors.with_opacity(0.3, active_color)),
+            alignment=ft.Alignment.CENTER,
+            on_click=lambda e: self._answer(rating_val),
+            on_hover=on_hover_btn,
+            animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
+        )
+        return container
 
     def _go_back(self, e):
         from UI.views.SelectDeckView import SelectDeckView
@@ -102,7 +166,9 @@ class StudyView(BaseView):
         card = self.session.next_card()
         if card:
             done, total, elapsed = self.session.progress
-            self.progress_text.value = f"{done}/{total}"
+            self.progress_text.value = f"Progress: {done} / {total} cards"
+            self.progress_bar.value = done / total if total > 0 else 0.0
+            
             self.front_text.value = card.front
             
             if card.reading:
@@ -114,14 +180,27 @@ class StudyView(BaseView):
             self.back_text.value = card.back
             self.back_text.visible = False
             
+            self.divider_line.visible = False
+            
             if card.example:
-                self.example_text.value = f"Przykład:\n{card.example}"
+                example_val = card.example
+                if example_val.lower().startswith("przykład:") or example_val.startswith("Przykład:"):
+                    example_val = example_val.split(":", 1)[1].strip()
+                self.example_text.value = example_val
             else:
                 self.example_text.value = ""
             self.example_text.visible = False
             
+            # Reset card status header
+            self.status_pill.value = "QUESTION"
+            self.status_pill.color = PRIMARY
+            self.status_badge.border = ft.border.all(1, ft.Colors.with_opacity(0.3, PRIMARY))
+            self.action_hint_text.value = "Tap card to reveal answer"
+            
             self.buttons_container.opacity = 0.0
             self.buttons_container.disabled = True
+            self.card_container.shadow = None
+            
             try:
                 self.update()
             except RuntimeError:
@@ -133,11 +212,25 @@ class StudyView(BaseView):
         if self.reading_text.value:
             self.reading_text.visible = True
         self.back_text.visible = True
+        self.divider_line.visible = True
         if self.example_text.value:
             self.example_text.visible = True
             
+        self.status_pill.value = "ANSWER"
+        self.status_pill.color = ft.Colors.GREEN_400
+        self.status_badge.border = ft.border.all(1, ft.Colors.with_opacity(0.3, ft.Colors.GREEN_400))
+        self.action_hint_text.value = "Rate your recall difficulty below"
+        
         self.buttons_container.opacity = 1.0
         self.buttons_container.disabled = False
+        
+        # Soft glowing card border shadow on reveal
+        self.card_container.shadow = ft.BoxShadow(
+            spread_radius=1,
+            blur_radius=15,
+            color=ft.Colors.with_opacity(0.2, PRIMARY),
+            offset=ft.Offset(0, 5),
+        )
         self.update()
 
     def _answer(self, rating: int):
@@ -150,31 +243,41 @@ class StudyView(BaseView):
         minutes = int(elapsed_seconds // 60)
         seconds = int(elapsed_seconds % 60)
         time_str = f"{minutes:02d}:{seconds:02d}"
+        
         self.progress_text.visible = False
+        self.progress_bar.visible = False
         self.buttons_container.opacity = 0.0
         self.buttons_container.disabled = True
+        
         summary_column = ft.Column(
             controls=[
-                ft.Text("Sesja Zakończona! 🎉", size=28, weight=ft.FontWeight.BOLD, color=PRIMARY),
+                ft.Text("Session Finished! 🎉", size=24, weight=ft.FontWeight.BOLD, color=PRIMARY),
                 ft.Container(height=10),
                 ft.Row(
                     controls=[
-                        ft.Text("Przejrzane karty:", size=18, color=PRIMARY_TEXT),
-                        ft.Text(f"{self.session.correct + self.session.incorrect}", size=18, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT),
+                        ft.Text("Cards Reviewed:", size=16, color=PRIMARY_TEXT),
+                        ft.Text(f"{self.session.correct + self.session.incorrect}", size=16, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
                 ft.Row(
                     controls=[
-                        ft.Text("Czas trwania:", size=18, color=PRIMARY_TEXT),
-                        ft.Text(time_str, size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_400),
+                        ft.Text("Correct Answers:", size=16, color=ft.Colors.GREEN_400),
+                        ft.Text(f"{self.session.correct}", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.GREEN_400),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
-                ft.Container(height=20),
-                HoverButton(
-                    "Kontynuuj", 
-                    on_click=self._on_continue_click
+                ft.Row(
+                    controls=[
+                        ft.Text("Session Duration:", size=16, color=PRIMARY_TEXT),
+                        ft.Text(time_str, size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_400),
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                ),
+                ft.Container(height=15),
+                ft.Container(
+                    content=HoverButton("Continue", on_click=self._on_continue_click),
+                    alignment=ft.Alignment.CENTER,
                 ),
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -183,6 +286,12 @@ class StudyView(BaseView):
 
         self.card_container.content = summary_column
         self.card_container.on_click = None
+        self.card_container.shadow = ft.BoxShadow(
+            spread_radius=1,
+            blur_radius=20,
+            color=ft.Colors.with_opacity(0.3, PRIMARY),
+            offset=ft.Offset(0, 5),
+        )
         
         self.update()
 
