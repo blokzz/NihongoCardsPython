@@ -95,3 +95,14 @@ def get_next_card_id() -> int:
         if row[0] is None:
             return 1
         return row[0] + 1
+
+def get_card_count(deck_id: int) -> int:
+    with get_connection() as conn:
+        row = conn.execute("SELECT COUNT(*) FROM cards WHERE deck_id = ?", (deck_id,)).fetchone()
+        return row[0] if row else 0
+
+def get_due_card_count(deck_id: int) -> int:
+    with get_connection() as conn:
+        row = conn.execute("SELECT COUNT(*) FROM cards WHERE deck_id = ? AND next_review <= date('now')", (deck_id,)).fetchone()
+        return row[0] if row else 0
+
