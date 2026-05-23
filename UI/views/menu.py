@@ -1,3 +1,4 @@
+from UI.views.SettingsView import SettingsView
 from UI.views.BaseView import BaseView
 from UI.views.StudyView import StudyView
 from UI.views.DeckView import DeckView
@@ -13,7 +14,7 @@ class MenuView(BaseView):
         self.views_map = { 
             "Start": SelectDeckView,
             "Decks": DeckView,
-            "Settings": StudyView,
+            "Settings": SettingsView,
             "Exit": None
         }
         self.info_text = ft.Text("", size=16, color=PRIMARY_TEXT)
@@ -68,6 +69,6 @@ class MenuView(BaseView):
         if e.control.data == "Exit":
             await self.page.window.close()
         elif e.control.data == "Settings":
-            self.show_success("Ustawienia są w budowie!")
+            self._navigation(self.views_map[e.control.data])
         else:
             self._navigation(self.views_map[e.control.data])
