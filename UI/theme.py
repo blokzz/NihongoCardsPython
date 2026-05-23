@@ -33,16 +33,19 @@ BG_APP = ft.Colors.BLACK
 def set_primary_theme(theme_name):
     import sys
     if theme_name not in THEMES:
+        print(f"Theme {theme_name} not found in THEMES")
         return
     
     color_val = THEMES[theme_name]
     global PRIMARY
     PRIMARY = color_val
+    print(f"Setting primary theme global to: {theme_name}")
     
     for name, module in list(sys.modules.items()):
         if name.startswith("UI.") or name == "UI":
             if hasattr(module, "PRIMARY"):
                 try:
                     setattr(module, "PRIMARY", color_val)
-                except Exception:
-                    pass
+                    print(f"Updated PRIMARY in module: {name} to {theme_name}")
+                except Exception as e:
+                    print(f"Error setting PRIMARY in {name}: {e}")
