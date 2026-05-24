@@ -31,23 +31,23 @@ def delete_deck(deck_id: int) -> None:
 def get_cards(deck_id: int) -> list[Card]:
     with get_connection() as conn:
         rows = conn.execute(
-            "SELECT id, deck_id, front, back, card_type, example, reading, correct, incorrect, interval, next_review FROM cards WHERE deck_id = ?", (deck_id,)
+            "SELECT id, deck_id, front, back, card_type, example, reading, correct, incorrect, interval, next_review, onyomi, kunyomi FROM cards WHERE deck_id = ?", (deck_id,)
         ).fetchall()
-        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6], correct=r[7], incorrect=r[8], interval=r[9], next_review=r[10]) for r in rows]
+        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6], onyomi=r[11], kunyomi=r[12], correct=r[7], incorrect=r[8], interval=r[9], next_review=r[10]) for r in rows]
 
 def get_due_cards(deck_id: int) -> list[Card]:
     with get_connection() as conn:
         rows = conn.execute(
-            "SELECT id, deck_id, front, back, card_type, example, reading, correct, incorrect, interval, next_review FROM cards WHERE deck_id = ? AND next_review <= date('now')",
+            "SELECT id, deck_id, front, back, card_type, example, reading, correct, incorrect, interval, next_review, onyomi, kunyomi FROM cards WHERE deck_id = ? AND next_review <= date('now')",
             (deck_id,)
         ).fetchall()
-        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6], correct=r[7], incorrect=r[8], interval=r[9], next_review=r[10]) for r in rows]
+        return [Card(id=r[0], deck_id=r[1], front=r[2], back=r[3], card_type=r[4], example=r[5], reading=r[6], onyomi=r[11], kunyomi=r[12], correct=r[7], incorrect=r[8], interval=r[9], next_review=r[10]) for r in rows]
 
 def save_card(card: Card) -> int:
     with get_connection() as conn:
         cursor = conn.execute(
-            "INSERT INTO cards (deck_id, front, back, card_type, example, reading) VALUES (?, ?, ?, ?, ?, ?)",
-            (card.deck_id, card.front, card.back, card.card_type, card.example, card.reading)
+            "INSERT INTO cards (deck_id, front, back, card_type, example, reading, onyomi, kunyomi) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (card.deck_id, card.front, card.back, card.card_type, card.example, card.reading, getattr(card, 'onyomi', None), getattr(card, 'kunyomi', None))
         )
         return cursor.lastrowid
 
@@ -60,13 +60,13 @@ def update_card(card: Card) -> None:
             (card.correct, card.incorrect, card.next_review, card.interval, card.id)
         )
 
-def update_card_details(card_id: int, front: str, back: str, card_type: str, example: str, reading: str) -> None:
+def update_card_details(card_id: int, front: str, back: str, card_type: str, example: str, reading: str, onyomi: str = None, kunyomi: str = None) -> None:
     with get_connection() as conn:
         conn.execute(
             """UPDATE cards 
-               SET front = ?, back = ?, card_type = ?, example = ?, reading = ?
+               SET front = ?, back = ?, card_type = ?, example = ?, reading = ?, onyomi = ?, kunyomi = ?
                WHERE id = ?""",
-            (front, back, card_type, example, reading, card_id)
+            (front, back, card_type, example, reading, onyomi, kunyomi, card_id)
         )
 
 def delete_card(card_id: int) -> None:
