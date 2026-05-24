@@ -24,6 +24,8 @@ def init_db() -> None:
                 card_type   TEXT NOT NULL,
                 example     TEXT,
                 reading     TEXT,
+                onyomi      TEXT,
+                kunyomi     TEXT,
                 correct     INTEGER DEFAULT 0,
                 incorrect   INTEGER DEFAULT 0,
                 interval    INTEGER DEFAULT 1,
@@ -36,3 +38,12 @@ def init_db() -> None:
                 level   INTEGER DEFAULT 0
             );
         """)
+        
+        # # Ensure onyomi and kunyomi columns exist for backward compatibility with existing databases
+        # cursor = conn.execute("PRAGMA table_info(cards)")
+        # columns = [row[1] for row in cursor.fetchall()]
+        # if columns:  # Only if table info was returned (i.e. table exists)
+        #     if "onyomi" not in columns:
+        #         conn.execute("ALTER TABLE cards ADD COLUMN onyomi TEXT")
+        #     if "kunyomi" not in columns:
+        #         conn.execute("ALTER TABLE cards ADD COLUMN kunyomi TEXT")
