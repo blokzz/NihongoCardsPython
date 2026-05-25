@@ -6,9 +6,13 @@ class EmptyDeckError(Exception):
 
 class InvalidCardError(Exception):
     """Rzucany gdy karta nie zawiera japońskich znaków"""
-    def __init__(self, field: str):
+    def __init__(self, field: str, value: str = None):
         self.field = field
-        super().__init__(f"Field '{field}' does not contain Japanese characters")
+        self.value = value
+        msg = f"Field '{field}' does not contain Japanese characters"
+        if value:
+            msg += f": '{value}'"
+        super().__init__(msg)
 
 class InvalidJsonError(Exception):
     """Rzucany gdy plik JSON jest nieprawidłowy"""
