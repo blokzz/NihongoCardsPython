@@ -19,7 +19,7 @@ class Card:
         self.interval = interval
 
 class Deck:
-    def __init__(self, id: int, name: str):
+    def __init__(self, id: int, name: str, cards: list = []):
         self.id = id
         self.name = name
-        # self.cards = cards
+        self.cards = cards
