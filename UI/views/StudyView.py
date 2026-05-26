@@ -8,7 +8,6 @@ class StudyView(BaseView):
         super().__init__(navigate)
         self.session = StudySession(deck_id)
         
-        # Status Badge inside the card
         self.status_pill = ft.Text("QUESTION", size=10, weight=ft.FontWeight.BOLD, color=PRIMARY)
         self.status_badge = ft.Container(
             content=self.status_pill,
@@ -17,37 +16,34 @@ class StudyView(BaseView):
             padding=ft.padding.symmetric(horizontal=12, vertical=4),
         )
         
-        # Flashcard text elements
         self.front_text = ft.Text("", size=44, weight=ft.FontWeight.BOLD, color=PRIMARY_TEXT, text_align=ft.TextAlign.CENTER)
         self.reading_text = ft.Text("", size=18, color=PRIMARY, italic=True, visible=False, text_align=ft.TextAlign.CENTER)
         self.divider_line = ft.Divider(height=1, color=ft.Colors.with_opacity(0.1, PRIMARY_TEXT), visible=False)
         self.back_text = ft.Text("", size=24, color=PRIMARY_TEXT, weight=ft.FontWeight.W_500, visible=False, text_align=ft.TextAlign.CENTER)
         self.example_text = ft.Text("", size=15, color=ft.Colors.GREY_400, italic=True, visible=False, text_align=ft.TextAlign.CENTER)
-        
-        # Guide/Hint text and progress metrics
+        self.onyomi_text = ft.Text("", size=15, color=ft.Colors.GREY_400, italic=True, visible=False, text_align=ft.TextAlign.CENTER)
+        self.kunyomi_text = ft.Text("", size=15, color=ft.Colors.GREY_400, italic=True, visible=False, text_align=ft.TextAlign.CENTER)
         self.action_hint_text = ft.Text("Tap card to reveal answer", size=11, color=ft.Colors.GREY_500)
         self.progress_text = ft.Text("", size=14, weight=ft.FontWeight.W_500, color=ft.Colors.GREY_400)
         self.progress_bar = ft.ProgressBar(value=0.0, color=PRIMARY, bgcolor=ft.Colors.GREY_800, height=4, border_radius=2)
 
-        # Tactical physical card container
         self.card_container = ft.Container(
             content=ft.Column(
                 controls=[
-                    # Status header row
                     ft.Row(
                         controls=[
                             self.status_badge,
-                            ft.Icon(ft.Icons.LIGHTBULB_OUTLINE_ROUNDED, color=ft.Colors.GREY_600, size=20),
                         ],
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     ),
                     ft.Container(expand=True),
                     
-                    # Content area
                     ft.Column(
                         controls=[
                             self.front_text,
                             self.reading_text,
+                            self.onyomi_text,
+                            self.kunyomi_text,
                             self.divider_line,
                             self.back_text,
                             self.example_text,
@@ -57,7 +53,6 @@ class StudyView(BaseView):
                     ),
                     
                     ft.Container(expand=True),
-                    # Action hint
                     self.action_hint_text,
                 ],
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -67,12 +62,10 @@ class StudyView(BaseView):
             border=ft.border.all(1, ft.Colors.with_opacity(0.15, PRIMARY_TEXT)),
             padding=30,
             width=480,
-            height=320,  # Strict stable layout proportions
+            height=320,  
             alignment=ft.Alignment.CENTER,
             on_click=self._reveal,
         )
-
-        # Custom horizontal color-coded difficulty selector buttons
         self.btn_again = self._create_rating_button("Again", 0, ft.Colors.RED_400)
         self.btn_hard = self._create_rating_button("Hard", 3, ft.Colors.ORANGE_400)
         self.btn_good = self._create_rating_button("Good", 2, PRIMARY)
@@ -177,6 +170,18 @@ class StudyView(BaseView):
                 self.reading_text.value = ""
             self.reading_text.visible = False
             
+            if card.onyomi:
+                self.onyomi_text.value = f"({card.onyomi})"
+            else:
+                self.onyomi_text.value = ""
+            self.onyomi_text.visible = False
+
+            if card.kunyomi:
+                self.kunyomi_text.value = f"({card.kunyomi})"
+            else:
+                self.kunyomi_text.value = ""
+            self.kunyomi_text.visible = False
+                
             self.back_text.value = card.back
             self.back_text.visible = False
             
@@ -184,14 +189,13 @@ class StudyView(BaseView):
             
             if card.example:
                 example_val = card.example
-                if example_val.lower().startswith("przykład:") or example_val.startswith("Przykład:"):
+                if example_val.lower().startswith("example:") or example_val.startswith("Example:"):
                     example_val = example_val.split(":", 1)[1].strip()
                 self.example_text.value = example_val
             else:
                 self.example_text.value = ""
             self.example_text.visible = False
             
-            # Reset card status header
             self.status_pill.value = "QUESTION"
             self.status_pill.color = PRIMARY
             self.status_badge.border = ft.border.all(1, ft.Colors.with_opacity(0.3, PRIMARY))
@@ -213,6 +217,11 @@ class StudyView(BaseView):
             self.reading_text.visible = True
         self.back_text.visible = True
         self.divider_line.visible = True
+        if self.onyomi_text.value:
+            print(self.onyomi_text.value)
+            self.onyomi_text.visible = True
+        if self.kunyomi_text.value:
+            self.kunyomi_text.visible = True
         if self.example_text.value:
             self.example_text.visible = True
             
@@ -224,7 +233,6 @@ class StudyView(BaseView):
         self.buttons_container.opacity = 1.0
         self.buttons_container.disabled = False
         
-        # Soft glowing card border shadow on reveal
         self.card_container.shadow = ft.BoxShadow(
             spread_radius=1,
             blur_radius=15,
@@ -249,6 +257,12 @@ class StudyView(BaseView):
         self.buttons_container.opacity = 0.0
         self.buttons_container.disabled = True
         
+        # Award XP
+        xp_earned = self.session.correct * 10 + 20
+        app = getattr(self._navigation, "__self__", None)
+        if app and hasattr(app, "add_xp"):
+            app.add_xp(xp_earned)
+            
         summary_column = ft.Column(
             controls=[
                 ft.Text("Session Finished! 🎉", size=24, weight=ft.FontWeight.BOLD, color=PRIMARY),
@@ -264,6 +278,13 @@ class StudyView(BaseView):
                     controls=[
                         ft.Text("Correct Answers:", size=16, color=ft.Colors.GREEN_400),
                         ft.Text(f"{self.session.correct}", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.GREEN_400),
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                ),
+                ft.Row(
+                    controls=[
+                        ft.Text("XP Earned:", size=16, color=ft.Colors.AMBER_400),
+                        ft.Text(f"+{xp_earned} XP", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.AMBER_400),
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
