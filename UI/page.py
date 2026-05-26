@@ -5,8 +5,8 @@ from UI.views.menu import MenuView
 class JapaneseApp:
     def __init__(self, page: ft.Page):
         self.page = page
-        self.xp = 0
-        self.level = 0
+        from data.repository import get_progress
+        self.xp, self.level = get_progress()
         self.setup_page()
         self.navigate(MenuView)
 

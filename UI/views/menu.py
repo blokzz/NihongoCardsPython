@@ -18,6 +18,9 @@ class MenuView(BaseView):
             "Exit": None
         }
         self.info_text = ft.Text("", size=16, color=PRIMARY_TEXT)
+        app = getattr(self._navigation, "__self__", None)
+        if app:
+            self.info_text.value = f"Level: {app.level} | XP: {app.xp}"
         self.content = ft.Column(
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
