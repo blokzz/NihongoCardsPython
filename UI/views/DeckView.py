@@ -8,6 +8,7 @@ from UI.components.CustomField import CustomTextField
 from UI.components.BaseDialog import BaseDialog
 from data.repository import *
 from data.io.importer import *
+from core.exceptions import *
 from UI.views.BaseView import BaseView
 class DeckView(BaseView):
     def __init__(self, navigate):

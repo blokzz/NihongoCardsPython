@@ -18,6 +18,11 @@ class CardDetails(ft.Container):
         details_column = []
         if card.reading:
             details_column.append(ft.Text(f"Reading: {card.reading}", size=16, color=PRIMARY_TEXT, italic=True))
+        if card.card_type == "Kanji":
+            if getattr(card, "onyomi", None):
+                details_column.append(ft.Text(f"Onyomi: {card.onyomi}", size=16, color=PRIMARY_TEXT))
+            if getattr(card, "kunyomi", None):
+                details_column.append(ft.Text(f"Kunyomi: {card.kunyomi}", size=16, color=PRIMARY_TEXT))
         if card.example:
             details_column.append(ft.Text(f"Example: {card.example}", size=16, color=PRIMARY_TEXT))
             
