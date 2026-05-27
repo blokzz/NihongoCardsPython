@@ -21,6 +21,8 @@ class SelectDeckCard(ft.Container):
         # Fetch counts
         total_cards = get_card_count(deck.id)
         due_cards = get_due_card_count(deck.id)
+        self.total_cards = total_cards
+        self.due_cards = due_cards
         
         # Due badge styling
         badge_color = PRIMARY if due_cards > 0 else ft.Colors.GREY_800
@@ -91,6 +93,22 @@ class SelectDeckCard(ft.Container):
         self.update()
 
     def _on_click(self, e):
+        if self.total_cards == 0:
+            snack = ft.SnackBar(
+                content=ft.Row(
+                    controls=[
+                        ft.Icon(ft.Icons.WARNING_ROUNDED, color=ft.Colors.AMBER_300),
+                        ft.Text(f"Deck '{self.deck.name}' is empty! Add cards first.", color=ft.Colors.WHITE),
+                    ]
+                ),
+                bgcolor=ft.Colors.GREY_900,
+                duration=3000,
+                open=True,
+            )
+            self.page.overlay.append(snack)
+            self.page.update()
+            return
+
         print(f"Wybrano talię do powtórki: {self.deck.name}")
         self.navigate(StudyView, deck_id=self.deck.id)
 
