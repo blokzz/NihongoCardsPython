@@ -86,7 +86,7 @@ class SettingsView(BaseView):
             content=ft.Row(
                 controls=[
                     ft.Icon(ft.Icons.REFRESH_ROUNDED, color=ft.Colors.RED_400, size=18),
-                    ft.Text("Zresetuj", color=ft.Colors.RED_400, weight=ft.FontWeight.BOLD, size=14),
+                    ft.Text("Reset", color=ft.Colors.RED_400, weight=ft.FontWeight.BOLD, size=14),
                 ],
                 spacing=5,
             ),
@@ -112,7 +112,7 @@ class SettingsView(BaseView):
                                 alignment=ft.Alignment(-1, 0),
                             ),
                             ft.Text(
-                                "Ustawienia",
+                                "Settings",
                                 size=32,
                                 weight=ft.FontWeight.W_900,
                                 color=PRIMARY_TEXT,
@@ -135,54 +135,54 @@ class SettingsView(BaseView):
                         spacing=20,
                         controls=[
                             self.create_setting_card(
-                                "Nauka & Fiszki",
+                                "Study & Cards",
                                 [
                                     self.create_setting_row(
                                         ft.Icons.TRACK_CHANGES_ROUNDED,
-                                        "Dzienny cel powtórek",
-                                        "Określa, ile nowych słówek chcesz opanować każdego dnia.",
+                                        "Daily goal",
+                                        "Sets the number of new words you want to learn each day.",
                                         self.dropdown_goal
                                     ),
                                     self.create_setting_row(
                                         ft.Icons.SORT_ROUNDED,
-                                        "Kolejność fiszek",
-                                        "Ustal czy chcesz powtarzać słówka losowo, czy według daty dodania.",
+                                        "Study Order",
+                                        "Decide whether you want to review words randomly or by their creation date.",
                                         self.dropdown_order
                                     ),
                                     self.create_setting_row(
                                         ft.Icons.TRANSLATE_ROUNDED,
-                                        "Zapis fonetyczny (Kana/Romaji)",
-                                        "Pokazuje pomocnicze czytanie nad znakami Kanji.",
+                                        "Phonetic transcription (Kana/Romaji)",
+                                        "Shows auxiliary reading above Kanji characters.",
                                         self.switch_reading
                                     ),
                                 ]
                             ),
                             
                             self.create_setting_card(
-                                "Wygląd & Dźwięki",
+                                "Appearance & Sounds",
                                 [
                                     self.create_setting_row(
                                         ft.Icons.PALETTE_ROUNDED,
-                                        "Kolor przewodzący",
-                                        "Wybierz główny kolor akcentowy aplikacji.",
+                                        "Primary color",
+                                        "Choose the main accent color of the application.",
                                         self.theme_row
                                     ),
                                     self.create_setting_row(
                                         ft.Icons.VOLUME_UP_ROUNDED,
-                                        "Efekty dźwiękowe",
-                                        "Odtwarzaj dźwiękowe potwierdzenia odpowiedzi w trakcie sesji nauki.",
+                                        "Sound effects",
+                                        "Plays sound confirmations of answers during the learning session.",
                                         self.switch_sound
                                     ),
                                 ]
                             ),
                             
                             self.create_setting_card(
-                                "Bezpieczeństwo & Dane",
+                                "Safety & Data",
                                 [
                                     self.create_setting_row(
                                         ft.Icons.DELETE_FOREVER_ROUNDED,
-                                        "Resetuj postępy",
-                                        "Resetuje wszystkie statystyki, poziomy oraz daty kolejnych powtórek.",
+                                        "Reset progress",
+                                        "Resets all statistics, levels and next review dates.",
                                         self.btn_reset
                                     ),
                                 ]
@@ -190,7 +190,7 @@ class SettingsView(BaseView):
                             
                             ft.Container(
                                 content=ft.Text(
-                                    "Zapisane ustawienia zostaną automatycznie zastosowane.",
+                                    "Saved settings will be automatically applied.",
                                     size=12,
                                     italic=True,
                                     color=ft.Colors.GREY_500,
@@ -250,7 +250,7 @@ class SettingsView(BaseView):
 
     def _save_settings_switches(self, e):
         self._save_settings()
-        self.show_success("Ustawienia zostały zapisane!")
+        self.show_success("Settings saved successfully!")
 
     def _change_theme(self, theme_name):
         self.current_theme = theme_name
@@ -259,14 +259,14 @@ class SettingsView(BaseView):
         from UI.theme import set_primary_theme
         set_primary_theme(theme_name)
         
-        self.show_success("Kolor przewodzący został zmieniony!")
+        self.show_success("Primary color has been changed!")
         self._navigation(SettingsView)
 
     def _on_dropdown_change(self, e):
         self.current_goal = self.dropdown_goal.value
         self.current_order = self.dropdown_order.value
         self._save_settings()
-        self.show_success("Ustawienia zostały zapisane!")
+        self.show_success("Settings saved successfully!")
 
     def create_setting_card(self, title: str, controls_list: list):
         return ft.Container(
