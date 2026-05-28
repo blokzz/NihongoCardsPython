@@ -9,7 +9,6 @@ def check_level_up(func):
         
         self.level = self.xp // 100
         if self.level > old_level:
-            print(f"Awans! Poziom {self.level}")
             self.show_level_up_dialog()
             
         from data.repository import save_progress
