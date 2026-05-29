@@ -37,6 +37,13 @@ def init_db() -> None:
                 xp      INTEGER DEFAULT 0,
                 level   INTEGER DEFAULT 0
             );
+
+            CREATE TABLE IF NOT EXISTS review_history (
+                id      INTEGER PRIMARY KEY AUTOINCREMENT,
+                date    DATE DEFAULT CURRENT_DATE,
+                cards_learned INTEGER DEFAULT 0,
+                cards_reviewed INTEGER DEFAULT 0
+            );
         """)
         
         # # Ensure onyomi and kunyomi columns exist for backward compatibility with existing databases
