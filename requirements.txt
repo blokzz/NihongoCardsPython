@@ -1,1 +1,4 @@
-flet
+flet==0.84
+matplotlib==3.7.5
+pandas
+july
