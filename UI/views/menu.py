@@ -3,6 +3,7 @@ from UI.views.BaseView import BaseView
 from UI.views.StudyView import StudyView
 from UI.views.DeckView import DeckView
 from UI.views.SelectDeckView import SelectDeckView
+from UI.views.StatsView import StatsView
 import flet as ft
 from UI.components.hoverButton import HoverButton
 from UI.theme import *
@@ -14,6 +15,7 @@ class MenuView(BaseView):
         self.views_map = { 
             "Start": SelectDeckView,
             "Decks": DeckView,
+            "Stats": StatsView,
             "Settings": SettingsView,
             "Exit": None
         }
@@ -50,6 +52,7 @@ class MenuView(BaseView):
                         controls=[
                             HoverButton("Start", on_click=self._on_fiszki_click, data="Start"),
                             HoverButton("Decks", on_click=self._on_fiszki_click, data="Decks"),
+                            HoverButton("Stats", on_click=self._on_fiszki_click, data="Stats"),
                             HoverButton("Settings", on_click=self._on_fiszki_click, data="Settings"),
                             HoverButton("Exit", on_click=self._on_fiszki_click, data="Exit"),
                         ],
