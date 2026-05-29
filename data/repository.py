@@ -1,3 +1,4 @@
+from datetime import date
 from data.models import Deck, Card
 from core.exceptions import EmptyDeckError
 from data.database import get_connection
@@ -106,3 +107,23 @@ def get_due_card_count(deck_id: int) -> int:
         row = conn.execute("SELECT COUNT(*) FROM cards WHERE deck_id = ? AND next_review <= date('now')", (deck_id,)).fetchone()
         return row[0] if row else 0
 
+def get_stats_all_time() -> list[tuple[date, int, int]]:
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT date, cards_learned, cards_reviewed FROM review_history"
+        ).fetchall()
+        return [ (date.fromisoformat(row[0]), row[1], row[2]) for row in rows]
+
+def get_stats() -> tuple[int, int]:
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT cards_learned, cards_reviewed FROM review_history WHERE date = date('now')"
+        ).fetchone()
+        return (row[0], row[1]) if row else (0, 0)
+
+def save_stats(cards_learned: int, cards_reviewed: int) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO review_history (date, cards_learned, cards_reviewed) VALUES (date('now'), ?, ?)",
+            (cards_learned, cards_reviewed)
+        )
