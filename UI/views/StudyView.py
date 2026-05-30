@@ -3,6 +3,9 @@ from UI.components.hoverButton import HoverButton
 from core.study_session import StudySession
 from UI.theme import *
 from UI.views.BaseView import BaseView
+from data.repository import save_stats , get_stats
+from UI.views.StatsView import StatsView
+
 class StudyView(BaseView):
     def __init__(self, navigate, *, deck_id: int):
         super().__init__(navigate)
@@ -218,7 +221,6 @@ class StudyView(BaseView):
         self.back_text.visible = True
         self.divider_line.visible = True
         if self.onyomi_text.value:
-            print(self.onyomi_text.value)
             self.onyomi_text.visible = True
         if self.kunyomi_text.value:
             self.kunyomi_text.visible = True
@@ -257,12 +259,12 @@ class StudyView(BaseView):
         self.buttons_container.opacity = 0.0
         self.buttons_container.disabled = True
         
-        # Award XP
         xp_earned = self.session.correct * 10 + 20
         app = getattr(self._navigation, "__self__", None)
         if app and hasattr(app, "add_xp"):
             app.add_xp(xp_earned)
-            
+        cards_reviewed, cards_learned = get_stats()
+        save_stats(cards_reviewed + self.session.correct + self.session.incorrect, cards_learned + self.session.correct)
         summary_column = ft.Column(
             controls=[
                 ft.Text("Session Finished! 🎉", size=24, weight=ft.FontWeight.BOLD, color=PRIMARY),
@@ -296,9 +298,13 @@ class StudyView(BaseView):
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
                 ft.Container(height=15),
-                ft.Container(
-                    content=HoverButton("Continue", on_click=self._on_continue_click),
-                    alignment=ft.Alignment.CENTER,
+                ft.Row(
+                    controls=[
+                        HoverButton("Continue", on_click=self._on_continue_click),
+                        HoverButton("Stats", on_click=self._on_stats_click),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    spacing=15,
                 ),
             ],
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -319,3 +325,7 @@ class StudyView(BaseView):
     def _on_continue_click(self, e):
         from UI.views.SelectDeckView import SelectDeckView
         self._navigation(SelectDeckView)
+
+    def _on_stats_click(self, e):
+        from UI.views.StatsView import StatsView
+        self._navigation(StatsView)
