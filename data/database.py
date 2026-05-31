@@ -45,12 +45,3 @@ def init_db() -> None:
                 cards_reviewed INTEGER DEFAULT 0
             );
         """)
-        
-        # # Ensure onyomi and kunyomi columns exist for backward compatibility with existing databases
-        # cursor = conn.execute("PRAGMA table_info(cards)")
-        # columns = [row[1] for row in cursor.fetchall()]
-        # if columns:  # Only if table info was returned (i.e. table exists)
-        #     if "onyomi" not in columns:
-        #         conn.execute("ALTER TABLE cards ADD COLUMN onyomi TEXT")
-        #     if "kunyomi" not in columns:
-        #         conn.execute("ALTER TABLE cards ADD COLUMN kunyomi TEXT")
