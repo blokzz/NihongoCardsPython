@@ -82,7 +82,6 @@ class DeckView(BaseView):
     def _close_dialog(self, dialog: ft.AlertDialog):
         dialog.open = False
         self.page.update()
-        print("Zamknięto dialog")
     def show_add_deck_dialog(self, e):
         field = CustomTextField(label="Nazwa talii", autofocus=True)
         dialog = BaseDialog(
@@ -102,7 +101,6 @@ class DeckView(BaseView):
         save_deck(Deck(id=len(self.decks)+1, name=name))
         self._close_dialog(dialog)
         self._refresh()
-        print(f"Dodano talię o nazwie: {name}")
 
     def _refresh(self):
         self.grid.controls = [DeckCard(deck, navigate=self._navigation) for deck in self._load_decks()]
