@@ -24,8 +24,10 @@ def log_errors(func):
         except Exception as e:
             with open("errors.log", "a") as f:
                 f.write(f"{datetime.now()} | {func.__name__} | {e}\n")
-            raise
+                raise
     return wrapper
+
+
 
 def handle_errors(success_msg: str = None):
     def _handle(self, ex: Exception):

@@ -84,5 +84,4 @@ class DeckCard(ft.Container):
         self.update()
 
     def _on_click(self, e):
-        print(f"Wybrano talię: {self.deck.name}")
         self.navigate(DeckDetailsView, deck_id=self.deck.id)
