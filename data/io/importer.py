@@ -38,12 +38,15 @@ def _validate_json(data: dict) -> None:
         
     allowed_types = {"Kanji", "Kana", "Word", "Sentence"}
     
-    for card in data["cards"]:
-        if "front" not in card or "back" not in card:
-            raise InvalidJsonError("front/back")
-        if not japanese.search(card["front"]):
-            raise InvalidCardError("front", card["front"])
+    if any("front" not in card or "back" not in card for card in data["cards"]):
+        raise InvalidJsonError("front/back")
+        
+    first_invalid = next((card for card in data["cards"] if not japanese.search(card["front"])), None)
+    if first_invalid:
+        raise InvalidCardError("front", first_invalid["front"])
             
-        card_type = card.get("card_type", "Word")
-        if card_type not in allowed_types:
-            raise InvalidFormatError(f"Card type '{card_type}' is not supported. Supported types: {allowed_types}")
+    imported_types = {card.get("card_type", "Word") for card in data["cards"]}
+    invalid_types = imported_types - allowed_types
+    if invalid_types:
+        invalid_type = sorted(list(invalid_types))[0]
+        raise InvalidFormatError(f"Card type '{invalid_type}' is not supported. Supported types: {allowed_types}")

@@ -15,16 +15,16 @@ def export_to_json(path: str, deck_id: int) -> None:
     
     for card in cards:
         card_dict = {
-            "front": card.front,
-            "back": card.back,
-            "card_type": card.card_type,
-            "example": card.example or "",
-            "reading": card.reading or "",
+            k: v for k, v in [
+                ("front", card.front),
+                ("back", card.back),
+                ("card_type", card.card_type),
+                ("example", card.example or ""),
+                ("reading", card.reading or ""),
+                ("onyomi", getattr(card, "onyomi", None)),
+                ("kunyomi", getattr(card, "kunyomi", None)),
+            ] if v is not None
         }
-        if getattr(card, "onyomi", None) is not None:
-            card_dict["onyomi"] = card.onyomi
-        if getattr(card, "kunyomi", None) is not None:
-            card_dict["kunyomi"] = card.kunyomi
         data["cards"].append(card_dict)
     
     dir_name = os.path.dirname(path)

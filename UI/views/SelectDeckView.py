@@ -10,7 +10,6 @@ class SelectDeckCard(ft.Container):
         self.deck = deck
         self.navigate = navigate
         
-        # Premium layout styling
         self.bgcolor = ft.Colors.GREY_900
         self.border_radius = 14
         self.border = ft.border.all(1, ft.Colors.with_opacity(0.1, PRIMARY_TEXT))
@@ -18,13 +17,11 @@ class SelectDeckCard(ft.Container):
         self.height = 135
         self.animate = ft.Animation(200, ft.AnimationCurve.EASE_OUT)
         
-        # Fetch counts
         total_cards = get_card_count(deck.id)
         due_cards = get_due_card_count(deck.id)
         self.total_cards = total_cards
         self.due_cards = due_cards
         
-        # Due badge styling
         badge_color = PRIMARY if due_cards > 0 else ft.Colors.GREY_800
         badge_text_color = PRIMARY_TEXT if due_cards > 0 else ft.Colors.GREY_400
         due_badge = ft.Container(
@@ -41,7 +38,6 @@ class SelectDeckCard(ft.Container):
         
         self.content = ft.Column(
             controls=[
-                # Top row with folder icon and due cards badge
                 ft.Row(
                     controls=[
                         ft.Icon(ft.Icons.FOLDER_ROUNDED, color=PRIMARY, size=24),
@@ -49,9 +45,7 @@ class SelectDeckCard(ft.Container):
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
-                # Expand to center name vertically
                 ft.Container(expand=True),
-                # Deck name text in the middle
                 ft.Text(
                     deck.name,
                     size=18,
@@ -61,7 +55,6 @@ class SelectDeckCard(ft.Container):
                     max_lines=2,
                 ),
                 ft.Container(expand=True),
-                # Bottom stats row
                 ft.Row(
                     controls=[
                         ft.Row(
