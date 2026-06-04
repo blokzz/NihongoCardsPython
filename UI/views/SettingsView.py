@@ -2,11 +2,11 @@ import flet as ft
 
 from UI.views.BaseView import BaseView
 from UI.theme import * 
+from utils import handle_errors
 
 class SettingsView(BaseView):
     def __init__(self, navigate):
         super().__init__(navigate)
-        print(f"SettingsView __init__ - PRIMARY: {PRIMARY}")
         self.expand = True
         
         settings = self._load_settings_file()
@@ -233,7 +233,7 @@ class SettingsView(BaseView):
             with open(settings_file, "w", encoding="utf-8") as f:
                 json.dump(settings, f, ensure_ascii=False, indent=4)
         except Exception as e:
-            print(f"Error saving settings file: {e}")
+           pass
 
     def did_mount(self):
         pass
@@ -248,10 +248,11 @@ class SettingsView(BaseView):
         }
         self._save_settings_file(settings)
 
+    @handle_errors("Settings saved successfully!")
     def _save_settings_switches(self, e):
         self._save_settings()
-        self.show_success("Settings saved successfully!")
 
+    @handle_errors("Primary color has been changed!")
     def _change_theme(self, theme_name):
         self.current_theme = theme_name
         self._save_settings()
@@ -259,14 +260,13 @@ class SettingsView(BaseView):
         from UI.theme import set_primary_theme
         set_primary_theme(theme_name)
         
-        self.show_success("Primary color has been changed!")
         self._navigation(SettingsView)
 
+    @handle_errors("Settings saved successfully!")
     def _on_dropdown_change(self, e):
         self.current_goal = self.dropdown_goal.value
         self.current_order = self.dropdown_order.value
         self._save_settings()
-        self.show_success("Settings saved successfully!")
 
     def create_setting_card(self, title: str, controls_list: list):
         return ft.Container(

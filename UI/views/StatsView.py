@@ -125,5 +125,5 @@ class StatsView(BaseView):
             plt.close(fig)
             return img_base64
         except Exception as e:
-            print(f"Error generating stats base64: {e}")
+            pass
             return None

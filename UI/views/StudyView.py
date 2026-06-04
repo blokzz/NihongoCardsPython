@@ -278,13 +278,6 @@ class StudyView(BaseView):
                 ),
                 ft.Row(
                     controls=[
-                        ft.Text("Correct Answers:", size=16, color=ft.Colors.GREEN_400),
-                        ft.Text(f"{self.session.correct}", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.GREEN_400),
-                    ],
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                ),
-                ft.Row(
-                    controls=[
                         ft.Text("XP Earned:", size=16, color=ft.Colors.AMBER_400),
                         ft.Text(f"+{xp_earned} XP", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.AMBER_400),
                     ],
@@ -311,6 +304,8 @@ class StudyView(BaseView):
             spacing=10,
         )
 
+        self.card_container.width = 600
+        self.card_container.height = 350
         self.card_container.content = summary_column
         self.card_container.on_click = None
         self.card_container.shadow = ft.BoxShadow(

@@ -109,7 +109,6 @@ class SelectDeckCard(ft.Container):
             self.page.update()
             return
 
-        print(f"Wybrano talię do powtórki: {self.deck.name}")
         self.navigate(StudyView, deck_id=self.deck.id)
 
 

@@ -14,7 +14,6 @@ class DeckView(BaseView):
     def __init__(self, navigate):
         super().__init__(navigate)
         self.expand = True
-        self.file_picker = ft.FilePicker()
         self.decks = get_all_decks()
         self.grid = ft.GridView(
             controls=[DeckCard(deck, self._navigation) for deck in self.decks],
@@ -111,7 +110,7 @@ class DeckView(BaseView):
 
     @handle_errors("Deck imported successfully")
     async def import_deck(self, e):
-        files = await self.file_picker.pick_files(
+        files = await ft.FilePicker().pick_files(
             allow_multiple=False,
             allowed_extensions=["json"],
             file_type=ft.FilePickerFileType.CUSTOM,
